@@ -8,7 +8,7 @@ const video = document.getElementById('video');
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
             video.srcObject = stream;
-            status.innerText = "Screen Connected!";
+            status.innerText = "Connected!";
         } catch (err) {
             status.innerText = "Error: Access Denied";
         }
@@ -17,53 +17,54 @@ const video = document.getElementById('video');
     async function readAndSolve() {
         if (!video.srcObject) return alert("Connect screen first!");
 
-        status.innerText = "Searching for the error...";
+        status.innerText = "Searching for the mistake...";
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
 
+        // Using 'fra' for French recognition
         const result = await Tesseract.recognize(canvas, 'fra');
         const fullText = result.data.text;
         rawTextOutput.innerText = fullText;
 
-        // NEW LOGIC: Look for the line that has dashes (—), which contains the choices
         const lines = fullText.split('\n');
-        let choiceLine = lines.find(l => l.includes('—') || l.includes('-'));
-        
-        if (!choiceLine) {
-            finalAnswerDiv.innerHTML = "<em>Could not find the choices. Make sure the list is visible!</em>";
-            return;
-        }
+        let foundWord = "";
 
-        const words = choiceLine.split(/[\s—\-]+/);
-        let found = "";
+        // 1. Identify the specific line with the multiple-choice options (separated by dashes)
+        const choiceLine = lines.find(l => l.includes('—') || (l.split(' ').length > 2 && l.includes('-')));
 
-        for (let word of words) {
-            let clean = word.toLowerCase().trim();
-            if (clean.length <= 2) continue;
+        if (choiceLine) {
+            // Split by the dashes or spaces
+            const words = choiceLine.split(/[\s—\-]+/);
+            
+            for (let word of words) {
+                let clean = word.toLowerCase().trim();
+                
+                // IGNORE THE WORD "INCORRECT" OR "CLIQUE"
+                if (clean.includes("incorrect") || clean.includes("clique") || clean.length < 3) continue;
 
-            // Rule 1: Cedilla ONLY before a, o, u. If it's before 'i' or 'e', it's WRONG.
-            if (clean.includes('çi') || clean.includes('çe')) {
-                found = word;
-                break;
-            }
-
-            // Rule 2: Needs a cedilla for 's' sound before a, o, u.
-            // In your game, words like 'berca' or 'lancais' (no hook) are the errors.
-            if ((clean.includes('ca') || clean.includes('co') || clean.includes('cu')) && !clean.includes('ç')) {
-                // Ignore the word 'commercial' if it's spelled correctly without a hook
-                if (clean !== "commercial") { 
-                    found = word;
+                // RULE A: Cedilla before 'i' or 'e' is WRONG (e.g., commerçial)
+                if (clean.includes('çi') || clean.includes('çe')) {
+                    foundWord = word;
                     break;
+                }
+
+                // RULE B: Missing cedilla before a, o, u for an 'S' sound (e.g., lancais)
+                // We check if it has ca/co/cu and it's NOT a common correctly spelled word like 'commercial'
+                if ((clean.includes('ca') || clean.includes('co') || clean.includes('cu')) && !clean.includes('ç')) {
+                    if (clean !== "commercial") {
+                        foundWord = word;
+                        break;
+                    }
                 }
             }
         }
 
-        if (found) {
+        if (foundWord) {
             status.innerText = "Answer Found!";
-            finalAnswerDiv.innerHTML = `<div class="answer-highlight"><strong>THE ANSWER:</strong> ${found}</div>`;
+            finalAnswerDiv.innerHTML = `<div class="answer-highlight"><strong>CLICK THIS WORD:</strong> ${foundWord}</div>`;
         } else {
-            status.innerText = "Scanning complete.";
-            finalAnswerDiv.innerHTML = "<em>No error detected in this row.</em>";
+            status.innerText = "Ready.";
+            finalAnswerDiv.innerHTML = "<em>I read the text but couldn't find a grammar error in the choices.</em>";
         }
     }
