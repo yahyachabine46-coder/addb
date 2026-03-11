@@ -2,41 +2,27 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>AI Screen Brain - French Edition</title>
+    <title>French Cedilla Solver</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #1a1a1a; color: #e0e0e0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { color: #4dabff; margin-bottom: 5px; }
-        .status-bar { color: #00ff88; font-weight: bold; margin: 15px 0; min-height: 24px; }
-        .controls { margin: 20px 0; }
-        button { padding: 12px 25px; font-size: 16px; cursor: pointer; border: none; border-radius: 5px; margin: 5px; transition: 0.3s; font-weight: bold; }
-        .btn-connect { background: #007bff; color: white; }
-        .btn-solve { background: #28a745; color: white; }
-        button:hover { opacity: 0.8; transform: translateY(-2px); }
-        #output-box { margin-top: 20px; padding: 20px; background: #121212; border-radius: 10px; border-left: 5px solid #4dabff; text-align: left; }
-        .answer-highlight { color: #ff4757; font-size: 1.5em; display: block; margin-top: 15px; background: rgba(255, 71, 87, 0.1); padding: 10px; border-radius: 5px; border: 1px dashed #ff4757; }
+        body { font-family: sans-serif; text-align: center; background: #121212; color: white; padding: 20px; }
+        .box { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 2px solid #333; max-width: 600px; margin: auto; }
+        #status { color: #00ffcc; font-weight: bold; margin: 10px; }
+        .ans { color: #ff4757; font-size: 28px; font-weight: bold; background: rgba(255, 71, 87, 0.1); padding: 10px; border-radius: 5px; margin-top: 15px; }
+        button { padding: 15px 25px; font-size: 18px; cursor: pointer; border-radius: 8px; border: none; margin: 5px; font-weight: bold; }
+        .btn-blue { background: #007bff; color: white; }
+        .btn-green { background: #28a745; color: white; }
         video, canvas { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>AI Screen Brain</h1>
-    <p>Target: French Cedilla (ç) Lessons</p>
-
-    <div class="controls">
-        <button class="btn-connect" onclick="startCapture()">1. Select Screen</button>
-        <button class="btn-solve" onclick="readAndSolve()">2. Find the Answer</button>
-    </div>
-
-    <div id="status" class="status-bar">Ready to start...</div>
-
-    <div id="output-box">
-        <strong>Detected Text:</strong>
-        <p id="rawText">No data yet.</p>
-        <div id="finalAnswer"></div>
-    </div>
+<div class="box">
+    <h1>Cedilla Brain</h1>
+    <button class="btn-blue" onclick="startCapture()">1. Connect Screen</button>
+    <button class="btn-green" onclick="solve()">2. Get Answer</button>
+    <div id="status">Ready...</div>
+    <div id="result"></div>
 </div>
 
 <video id="video" autoplay></video>
@@ -45,77 +31,47 @@
 <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
-    const status = document.getElementById('status');
-    const rawTextOutput = document.getElementById('rawText');
-    const finalAnswerDiv = document.getElementById('finalAnswer');
+    const resultDiv = document.getElementById('result');
 
-    // 1. Connection Logic
     async function startCapture() {
-        try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-            video.srcObject = stream;
-            status.innerText = "Connected to screen! Click 'Find the Answer' when the question is visible.";
-        } catch (err) {
-            status.innerText = "Error: Please allow screen access.";
-            console.error(err);
-        }
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        video.srcObject = stream;
+        document.getElementById('status').innerText = "Screen Connected!";
     }
 
-    // 2. OCR and Repair Logic
-    async function readAndSolve() {
-        if (!video.srcObject) {
-            alert("Connect the screen first!");
-            return;
-        }
-
-        status.innerText = "Analyzing French grammar...";
-        finalAnswerDiv.innerHTML = "";
-
-        // Capture current frame
+    async function solve() {
+        document.getElementById('status').innerText = "Analyzing...";
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
 
-        // Run Tesseract with French dictionary
-        try {
-            const result = await Tesseract.recognize(canvas, 'fra');
-            const text = result.data.text;
-            rawTextOutput.innerText = text;
+        const { data: { text } } = await Tesseract.recognize(canvas, 'fra');
+        const words = text.split(/[\s—\-]+/);
+        let found = "";
 
-            // REPAIR LOGIC: Find the incorrect word
-            // We look for words containing "ca", "co", or "cu" that usually need a ç
-            const words = text.split(/[\s,;—\-]+/);
-            let incorrectWord = "";
+        for (let word of words) {
+            let clean = word.toLowerCase().trim();
+            // IGNORE THE WORDS THAT ARE PART OF THE LESSON TEXT
+            if (["incorrect", "clique", "cédille", "prononce", "devant"].includes(clean)) continue;
+            if (clean.length < 4) continue;
 
-            for (let word of words) {
-                let lowWord = word.toLowerCase();
-                // Common mistake patterns in your screens: berca, hamecgon, remplacant
-                if (lowWord.includes("ca") || lowWord.includes("co") || lowWord.includes("cu")) {
-                    // If it doesn't have the cedilla, it's likely the "incorrect" one in these exercises
-                    if (!lowWord.includes("ç")) {
-                        // Filter out common small words like "car" or "avec"
-                        if (lowWord.length > 3) {
-                            incorrectWord = word;
-                            break;
-                        }
-                    }
-                }
+            // RULE 1: ç before i or e is WRONG (commerçial)
+            if (clean.includes('çi') || clean.includes('çe')) {
+                found = word; break;
             }
-
-            if (incorrectWord) {
-                status.innerText = "Answer Found!";
-                finalAnswerDiv.innerHTML = `<div class="answer-highlight"><strong>THE ANSWER:</strong> ${incorrectWord}</div>`;
-            } else {
-                status.innerText = "Analysis complete.";
-                finalAnswerDiv.innerHTML = "<em>Could not find a clear spelling error. Try again with a clearer view.</em>";
+            // RULE 2: Missing ç before a, o, u (berca, lancais)
+            if ((clean.includes('ca') || clean.includes('co') || clean.includes('cu')) && !clean.includes('ç')) {
+                if (clean !== "commercial") { found = word; break; }
             }
+        }
 
-        } catch (err) {
-            status.innerText = "Error reading screen.";
-            console.error(err);
+        if (found) {
+            document.getElementById('status').innerText = "Answer Found!";
+            resultDiv.innerHTML = `<div class="ans">CLICK THIS: ${found}</div>`;
+        } else {
+            document.getElementById('status').innerText = "Try moving the window closer.";
         }
     }
 </script>
-
 </body>
 </html>
