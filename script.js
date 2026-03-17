@@ -1,36 +1,25 @@
-// --- UNIVERSAL AUTO-SOLVER ---
-const quizDatabase = {
-    "What is the capital of France?": "Paris",
-    "What is 2 + 2?": "4"
-};
+// Replace the logic inside your solve() function with this:
 
-function autoSolve() {
-    // 1. Find the Question
-    const questionElement = document.querySelector('h1, h2, [class*="question"]');
-    if (!questionElement) return;
+const fullText = result.data.text.toLowerCase();
+const words = result.data.words;
+let foundAnswer = "Scanning...";
 
-    const currentQuestion = questionElement.innerText.trim();
-    const correctAnswer = quizDatabase[currentQuestion];
-
-    if (correctAnswer) {
-        // 2. Search EVERY element for the correct answer text
-        // This covers divs, spans, p, li, and buttons
-        const allElements = document.querySelectorAll('div, span, p, li, button, a');
+// Use 'some' or 'includes' to find the closest question
+for (let question in database) {
+    // If at least 50% of the question matches or specific keywords exist
+    if (fullText.includes(question.toLowerCase().split(' ')[0])) { 
+        const targetAnswer = database[question];
         
-        for (let el of allElements) {
-            // We check for an exact match so we don't click the wrong thing
-            if (el.innerText.trim() === correctAnswer && el.children.length === 0) {
-                console.log("🎯 Found it in a " + el.tagName + "! Clicking...");
-                
-                // Perform the click
-                el.click();
-                el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-                el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-                break; 
-            }
+        // Find the word that looks most like our answer
+        const wordObj = words.find(w => 
+            w.text.toLowerCase().replace(/[^a-z0-9]/g, "") === 
+            targetAnswer.toLowerCase().replace(/[^a-z0-9]/g, "")
+        );
+
+        if (wordObj) {
+            foundAnswer = targetAnswer;
+            document.getElementById('status').innerText = "FOUND MATCH!";
+            break; 
         }
     }
 }
-
-// Run every 1 second
-setInterval(autoSolve, 1000);
