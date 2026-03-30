@@ -1,25 +1,9 @@
-def count_words(text):
-    # .split() automatically handles multiple spaces and newlines
-    words = text.split()
-    return len(words)
+print("Paste your essay below. To finish and count, press Ctrl+D (Unix) or Ctrl+Z (Windows) then Enter:")
 
-# Paste your essay between the triple quotes
-my_essay = """
-Enter your essay text here. 
-It doesn't matter if there are multiple paragraphs
-or weird spacing—the script will handle it!
-"""
+import sys
 
-total_words = count_words(my_essay)
-print(f"Total word count: {total_words}")
-print("--- Essay Word Counter ---")
+# This reads everything until it hits an "End of File" signal
+essay_data = sys.stdin.read()
 
-# This acts as your "text box" input
-essay_input = input("Paste your essay here and press Enter: \n")
-
-# Process the text
-word_list = essay_input.split()
-count = len(word_list)
-
-print("-" * 26)
-print(f"Result: {count} words")
+words = essay_data.split()
+print(f"\nTotal word count: {len(words)}")
