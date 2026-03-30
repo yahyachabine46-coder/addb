@@ -1,25 +1,12 @@
-// Replace the logic inside your solve() function with this:
+def count_words_in_file(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as file:
+            content = file.read()
+            words = content.split()
+            return len(words)
+    except FileNotFoundError:
+        return "File not found. Please check the path."
 
-const fullText = result.data.text.toLowerCase();
-const words = result.data.words;
-let foundAnswer = "Scanning...";
-
-// Use 'some' or 'includes' to find the closest question
-for (let question in database) {
-    // If at least 50% of the question matches or specific keywords exist
-    if (fullText.includes(question.toLowerCase().split(' ')[0])) { 
-        const targetAnswer = database[question];
-        
-        // Find the word that looks most like our answer
-        const wordObj = words.find(w => 
-            w.text.toLowerCase().replace(/[^a-z0-9]/g, "") === 
-            targetAnswer.toLowerCase().replace(/[^a-z0-9]/g, "")
-        );
-
-        if (wordObj) {
-            foundAnswer = targetAnswer;
-            document.getElementById('status').innerText = "FOUND MATCH!";
-            break; 
-        }
-    }
-}
+# Usage
+file_name = "essay.txt" 
+print(f"Word count: {count_words_in_file(file_name)}")
