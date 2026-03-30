@@ -1,8 +1,14 @@
-// Add this right before ctx.drawImage(video, 0, 0);
-canvas.width = video.videoWidth * 2; // Double the size for better detail
-canvas.height = video.videoHeight * 2;
-ctx.scale(2, 2);
+def count_words(text):
+    # .split() automatically handles multiple spaces and newlines
+    words = text.split()
+    return len(words)
 
-// Add a filter to make text sharper
-ctx.filter = "contrast(1.5) grayscale(1) brightness(1.1)";
-ctx.drawImage(video, 0, 0);
+# Paste your essay between the triple quotes
+my_essay = """
+Enter your essay text here. 
+It doesn't matter if there are multiple paragraphs
+or weird spacing—the script will handle it!
+"""
+
+total_words = count_words(my_essay)
+print(f"Total word count: {total_words}")
