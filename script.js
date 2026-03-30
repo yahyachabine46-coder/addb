@@ -1,12 +1,11 @@
-def count_words_in_file(filename):
-    try:
-        with open(filename, 'r', encoding='utf-8') as file:
-            content = file.read()
-            words = content.split()
-            return len(words)
-    except FileNotFoundError:
-        return "File not found. Please check the path."
+print("--- Essay Word Counter ---")
 
-# Usage
-file_name = "essay.txt" 
-print(f"Word count: {count_words_in_file(file_name)}")
+# This acts as your "text box" input
+essay_input = input("Paste your essay here and press Enter: \n")
+
+# Process the text
+word_list = essay_input.split()
+count = len(word_list)
+
+print("-" * 26)
+print(f"Result: {count} words")
