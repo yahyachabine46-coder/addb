@@ -1,9 +1,15 @@
-print("Paste your essay below. To finish and count, press Ctrl+D (Unix) or Ctrl+Z (Windows) then Enter:")
+<script>
+    const textarea = document.getElementById('essayBox');
+    const wordCountDisplay = document.getElementById('wordCount');
 
-import sys
-
-# This reads everything until it hits an "End of File" signal
-essay_data = sys.stdin.read()
-
-words = essay_data.split()
-print(f"\nTotal word count: {len(words)}")
+    // 'input' captures every single keystroke, including backspaces and enters
+    textarea.addEventListener('input', () => {
+        const text = textarea.value.trim();
+        
+        // This line is the magic: it looks for any whitespace (spaces or new lines)
+        // and filters out the empty results.
+        const words = text ? text.split(/\s+/) : [];
+        
+        wordCountDisplay.innerText = words.length;
+    });
+</script>
