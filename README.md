@@ -1,66 +1,38 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>GastroAI - Saisie Caisse Maroc</title>
-    <style>
-        body {
-            /* On imagine ici le fond d'écran Maroc, flouté */
-            background-image: url('fond_maroc.jpg');
-            background-size: cover;
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-        }
-        .panel {
-            background: rgba(255, 255, 255, 0.9); /* Fond semi-transparent */
-            border-radius: 10px;
-            padding: 20px;
-            flex: 1;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h2 { border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
-        .alert { color: red; font-weight: bold; }
-    </style>
-</head>
-<body>
+<div class="panel">
+    <h2>Matériel Bluetooth</h2>
+    <button id="connectBluetooth" style="background-color: #007bff; color: white; padding: 10px;">
+        🔗 Connecter Imprimante Caisse
+    </button>
+    <p id="status">Statut : Déconnecté</p>
+</div>
 
-    <header>
-        <h1>GastroAI - Commande & Stocks</h1>
-    </header>
+<script>
+document.getElementById('connectBluetooth').addEventListener('click', async () => {
+    const statusText = document.getElementById('status');
+    
+    try {
+        statusText.innerText = "Recherche d'appareils...";
+        
+        // On demande à l'utilisateur de choisir un appareil Bluetooth
+        const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['battery_service'] // Remplacez par le service de votre imprimante
+        });
 
-    <div class="container">
-        <div class="panel">
-            <h2>Saisie de Commande</h2>
-            <p><strong>Commande Vocale (Transcription) :</strong></p>
-            <textarea rows="4" style="width:100%;">Je voudrais deux menus du jour, une eau gazeuse et un café s'il vous plaît.</textarea>
-            <button>Simuler Saisie Vocale</button>
+        statusText.innerText = `Tentative de connexion à : ${device.name}...`;
+        
+        const server = await device.gatt.connect();
+        
+        statusText.style.color = "green";
+        statusText.innerText = `Connecté à ${device.name} ! ✅`;
+        
+        // Ici, vous pouvez envoyer des données à l'imprimante
+        // ex: printReceipt(server);
 
-            <h3>Panier</h3>
-            <ul>
-                <li>2x Menu du Jour - 50.00€</li>
-                <li>1x Eau Gazeuse - 3.50€</li>
-                <li>1x Café - 2.00€</li>
-            </ul>
-            <p><strong>Total : 55.50€</strong></p>
-            <button style="background-color: green; color: white;">Valider la Commande</button>
-        </div>
-
-        <div class="panel">
-            <h2>Gestion des Stocks</h2>
-            <p>Farine : 75%</p>
-            <p>Viande : <span class="alert">40% - Niveau Bas</span></p>
-            <p>Légumes : 85%</p>
-
-            <h2>Prédiction IA</h2>
-            <p>Demain (Météo Pluie) : <span class="alert">+20% de Soupes Prévues</span>.</p>
-            <p>Recommandation : Commande Légumes +20%.</p>
-        </div>
-    </div>
-
-</body>
-</html>
+    } catch (error) {
+        console.error("Erreur Bluetooth : ", error);
+        statusText.style.color = "red";
+        statusText.innerText = "Erreur : " + error.message;
+    }
+});
+</script>
