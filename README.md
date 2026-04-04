@@ -1,34 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Yahya's Counter</title>
+    <meta charset="UTF-8">
+    <title>GastroAI - Saisie Caisse Maroc</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 500px; }
-        textarea { width: 100%; height: 200px; border: 2px solid #ddd; border-radius: 10px; padding: 10px; font-size: 18px; box-sizing: border-box; }
-        .result { background: #3498db; color: white; padding: 10px; border-radius: 50px; display: inline-block; margin-top: 10px; font-weight: bold; }
+        body {
+            /* On imagine ici le fond d'écran Maroc, flouté */
+            background-image: url('fond_maroc.jpg');
+            background-size: cover;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            background: rgba(255, 255, 255, 0.9); /* Fond semi-transparent */
+            border-radius: 10px;
+            padding: 20px;
+            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 { border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+        .alert { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Essay Word Counter</h2>
-    <textarea id="BOX" placeholder="Type here, Yahya..."></textarea>
-    <div class="result">Words: <span id="COUNT">0</span></div>
-</div>
+    <header>
+        <h1>GastroAI - Commande & Stocks</h1>
+    </header>
 
-<script>
-    // These link the HTML to the logic
-    const myBox = document.getElementById('BOX');
-    const myCount = document.getElementById('COUNT');
+    <div class="container">
+        <div class="panel">
+            <h2>Saisie de Commande</h2>
+            <p><strong>Commande Vocale (Transcription) :</strong></p>
+            <textarea rows="4" style="width:100%;">Je voudrais deux menus du jour, une eau gazeuse et un café s'il vous plaît.</textarea>
+            <button>Simuler Saisie Vocale</button>
 
-    myBox.addEventListener('input', function() {
-        const text = myBox.value.trim();
-        // This counts words even if you use 'Enter' or multiple spaces
-        const words = text ? text.split(/\s+/) : [];
-        myCount.innerText = words.length;
-    });
-</script>
+            <h3>Panier</h3>
+            <ul>
+                <li>2x Menu du Jour - 50.00€</li>
+                <li>1x Eau Gazeuse - 3.50€</li>
+                <li>1x Café - 2.00€</li>
+            </ul>
+            <p><strong>Total : 55.50€</strong></p>
+            <button style="background-color: green; color: white;">Valider la Commande</button>
+        </div>
+
+        <div class="panel">
+            <h2>Gestion des Stocks</h2>
+            <p>Farine : 75%</p>
+            <p>Viande : <span class="alert">40% - Niveau Bas</span></p>
+            <p>Légumes : 85%</p>
+
+            <h2>Prédiction IA</h2>
+            <p>Demain (Météo Pluie) : <span class="alert">+20% de Soupes Prévues</span>.</p>
+            <p>Recommandation : Commande Légumes +20%.</p>
+        </div>
+    </div>
 
 </body>
 </html>
