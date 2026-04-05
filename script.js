@@ -1,10 +1,16 @@
-async function getAIAnswer(questionText) {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=YOUR_API_KEY', {
-        method: 'POST',
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: "Solve this quiz question: " + questionText }] }]
-        })
-    });
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-}
+// 1. Request the Bluetooth Device
+const device = await navigator.bluetooth.requestDevice({
+    filters: [{ services: ['heart_rate'] }] 
+});
+
+const server = await device.gatt.connect();
+
+// 2. Receive Data
+const service = await server.getPrimaryService('heart_rate');
+const characteristic = await service.getCharacteristic('heart_rate_measurement');
+
+characteristic.addEventListener('characteristicvaluechanged', (event) => {
+    const value = event.target.value;
+    // 3. Send this value to your Python Backend with the TPU
+    sendToTPUBackend(value); 
+});
